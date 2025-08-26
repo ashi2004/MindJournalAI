@@ -9,7 +9,11 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
+    // Check for missing fields
     const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required: username, email, password.' });
+    }
 
     // Check if user exists
     let user = await User.findOne({ email });
@@ -28,11 +32,16 @@ router.post('/register', async (req, res) => {
 
     // Return token along with user info
     res.status(201).json({ token, username: user.username, email: user.email });
-
-    // res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    // Improved error output for debugging
+    console.error('Register error:', err);
+    let errorMsg = 'Server error';
+    if (err.name === 'ValidationError') {
+      errorMsg = err.message;
+    } else if (err.code === 11000) {
+      errorMsg = 'Duplicate field value: ' + JSON.stringify(err.keyValue);
+    }
+    res.status(500).json({ message: errorMsg, error: err.message });
   }
 });
 
