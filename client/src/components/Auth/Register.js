@@ -12,31 +12,30 @@ function Register({ onRegisterSuccess }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-     // Client-side validation:
-  if (!validateEmail(email)) {
-    setError("Please enter a valid email address.");
-    return;
-  }
+    // Client-side validation:
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
 
-  if (password.length < 6) {
-    setError("Password must be at least 6 characters.");
-    return;
-  }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
 
-  if (password !== confirmPassword) {
-    setError("Passwords do not match.");
-    return;
-  }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
     try {
-        
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -84,14 +83,14 @@ function Register({ onRegisterSuccess }) {
         required
       />
       <br />
-<input
-  type="password"
-  placeholder="Confirm Password"
-  value={confirmPassword}
-  onChange={(e) => setConfirmPassword(e.target.value)}
-  required
-/>
-<br/>
+      <input
+        type="password"
+        placeholder="Confirm Password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        required
+      />
+      <br />
       <button type="submit" disabled={loading}>
         {loading ? "Registering..." : "Register"}
       </button>

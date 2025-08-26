@@ -6,12 +6,13 @@ function JournalEntryCard({ entry, token, onUpdate, onDelete }) {
   const [mood, setMood] = useState(entry.mood);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   async function handleSave() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/journal/${entry._id}`, {
+      const res = await fetch(`${API_BASE}/api/journal/${entry._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -34,7 +35,7 @@ function JournalEntryCard({ entry, token, onUpdate, onDelete }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/journal/${entry._id}`, {
+      const res = await fetch(`${API_BASE}/api/journal/${entry._id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -80,10 +81,18 @@ function JournalEntryCard({ entry, token, onUpdate, onDelete }) {
   return (
     <div style={{ border: "1px solid #ccc", margin: 8, padding: 8 }}>
       <div>{new Date(entry.entryDate).toLocaleDateString()}</div>
-      <div><strong>Text:</strong> {entry.text}</div>
-      <div><strong>Mood:</strong> {entry.mood}</div>
-      <div><strong>Sentiment:</strong> {entry.sentiment}</div>
-      <div><strong>Themes:</strong> {entry.themes.join(", ")}</div>
+      <div>
+        <strong>Text:</strong> {entry.text}
+      </div>
+      <div>
+        <strong>Mood:</strong> {entry.mood}
+      </div>
+      <div>
+        <strong>Sentiment:</strong> {entry.sentiment}
+      </div>
+      <div>
+        <strong>Themes:</strong> {entry.themes.join(", ")}
+      </div>
       <button onClick={() => setIsEditing(true)}>Edit</button>
       <button onClick={handleDelete} disabled={loading}>
         {loading ? "Deleting..." : "Delete"}

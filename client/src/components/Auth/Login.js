@@ -6,6 +6,7 @@ function Login({ onLoginSuccess }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -13,7 +14,7 @@ function Login({ onLoginSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -27,7 +28,6 @@ function Login({ onLoginSuccess }) {
       const data = await response.json();
       saveToken(data.token);
       onLoginSuccess();
-
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -43,14 +43,16 @@ function Login({ onLoginSuccess }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
-      /><br />
+      />
+      <br />
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
-      /><br />
+      />
+      <br />
       <button type="submit" disabled={loading}>
         {loading ? "Logging in..." : "Login"}
       </button>

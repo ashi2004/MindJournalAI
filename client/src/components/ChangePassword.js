@@ -6,6 +6,7 @@ function ChangePassword({ token }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   async function handleChange(e) {
     e.preventDefault();
@@ -20,7 +21,7 @@ function ChangePassword({ token }) {
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/user/password", {
+      const res = await fetch(`${API_BASE}/api/user/password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +39,7 @@ function ChangePassword({ token }) {
         setMsg(data.message || "Error changing password.");
       }
     } catch (e) {
-        console.log(e);
+      console.log(e);
       setMsg("Network/server error.");
     }
     setLoading(false);
@@ -53,25 +54,32 @@ function ChangePassword({ token }) {
         value={currentPassword}
         onChange={(e) => setCurrentPassword(e.target.value)}
         required
-      /><br />
+      />
+      <br />
       <input
         type="password"
         placeholder="New password"
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
         required
-      /><br />
+      />
+      <br />
       <input
         type="password"
         placeholder="Confirm new password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         required
-      /><br />
+      />
+      <br />
       <button type="submit" disabled={loading}>
         {loading ? "Changing..." : "Change Password"}
       </button>
-      {msg && <div style={{ color: msg.includes("success") ? "green" : "red" }}>{msg}</div>}
+      {msg && (
+        <div style={{ color: msg.includes("success") ? "green" : "red" }}>
+          {msg}
+        </div>
+      )}
     </form>
   );
 }

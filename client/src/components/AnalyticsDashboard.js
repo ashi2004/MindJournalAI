@@ -24,16 +24,16 @@ ChartJS.register(
   Legend
 );
 
-
 function AnalyticsDashboard({ token }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API_BASE = process.env.REACT_APP_API_URL || "";
 
   useEffect(() => {
     async function fetchAnalytics() {
       setLoading(true);
       try {
-        const res = await fetch("/api/journal/analytics", {
+        const res = await fetch(`${API_BASE}/api/journal/analytics`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -47,14 +47,14 @@ function AnalyticsDashboard({ token }) {
   }, [token]);
 
   // Prepare data for charts
-  const labels = entries.map(e => new Date(e.entryDate).toLocaleDateString());
-  const moods = entries.map(e => e.mood);
+  const labels = entries.map((e) => new Date(e.entryDate).toLocaleDateString());
+  const moods = entries.map((e) => e.mood);
   const sentimentMap = { positive: 1, neutral: 0, negative: -1, mixed: 0.5 };
-  const sentimentScores = entries.map(e => sentimentMap[e.sentiment] ?? 0);
+  const sentimentScores = entries.map((e) => sentimentMap[e.sentiment] ?? 0);
 
   // Count moods frequency for bar chart
   const moodCounts = {};
-  moods.forEach(mood => {
+  moods.forEach((mood) => {
     moodCounts[mood] = (moodCounts[mood] || 0) + 1;
   });
   const moodLabels = Object.keys(moodCounts);
@@ -74,7 +74,8 @@ function AnalyticsDashboard({ token }) {
                 labels,
                 datasets: [
                   {
-                    label: "Sentiment Score (1=positive, 0=neutral, -1=negative)",
+                    label:
+                      "Sentiment Score (1=positive, 0=neutral, -1=negative)",
                     data: sentimentScores,
                     borderColor: "blue",
                     fill: false,

@@ -6,12 +6,13 @@ function MoodCalendar({ token }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [value, setValue] = useState(new Date()); // Selected date
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     async function fetchEntries() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/journal?page=1&limit=9999`, {
+        const res = await fetch(`${API_BASE}/api/journal?page=1&limit=9999`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch entries");
@@ -92,15 +93,21 @@ function MoodCalendar({ token }) {
                 <strong>Emoji:</strong> {entry.emoji || "🙂"} &nbsp;&nbsp;
                 <strong>Mood:</strong> {entry.mood}
               </p>
-              <p><strong>Sentiment:</strong> {entry.sentiment}</p>
-              <p><strong>Themes:</strong> {entry.themes.join(", ")}</p>
+              <p>
+                <strong>Sentiment:</strong> {entry.sentiment}
+              </p>
+              <p>
+                <strong>Themes:</strong> {entry.themes.join(", ")}
+              </p>
               <p>{entry.text}</p>
               <hr />
             </div>
           ))}
         </div>
       ) : (
-        <p style={{ marginTop: 20 }}>Select a date with an entry to see details</p>
+        <p style={{ marginTop: 20 }}>
+          Select a date with an entry to see details
+        </p>
       )}
     </>
   );
