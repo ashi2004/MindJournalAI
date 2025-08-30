@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { saveToken } from "../../auth";
+import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -17,17 +18,16 @@ function Register({ onRegisterSuccess }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    // Client-side validation:
+
+    // Client-side validation
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -41,7 +41,7 @@ function Register({ onRegisterSuccess }) {
         body: JSON.stringify({ username, email, password }),
       });
 
-      const data = await response.json(); // 👈 parse once
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || "Registration failed");
@@ -56,46 +56,79 @@ function Register({ onRegisterSuccess }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Register</h2>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        maxWidth: 400,
+        mx: "auto",
+        mt: 8,
+        p: 4,
+        boxShadow: 3,
+        borderRadius: 2,
+        bgcolor: "background.paper",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <Typography variant="h5" component="h2" textAlign="center" mb={2}>
+        Register
+      </Typography>
 
-      <input
+      <TextField
+        label="Username"
         type="text"
-        placeholder="Username"
+        required
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <input
+
+      <TextField
+        label="Email"
         type="email"
-        placeholder="Email"
+        required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <input
+
+      <TextField
+        label="Password"
         type="password"
-        placeholder="Password"
+        required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <input
+
+      <TextField
+        label="Confirm Password"
         type="password"
-        placeholder="Confirm Password"
+        required
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <button type="submit" disabled={loading}>
+
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={loading}
+        fullWidth
+        sx={{ mt: 1 }}
+      >
         {loading ? "Registering..." : "Register"}
-      </button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </form>
+      </Button>
+
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+    </Box>
   );
 }
 

@@ -1,8 +1,17 @@
 import React, { useState } from "react";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  Paper,
+  List,
+  ListItem,
+  Link as MuiLink,
+} from "@mui/material";
 
 function JournalForm({ token, onEntryCreated }) {
-  console.log("Token in JournalForm:", token);
-
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,13 +25,13 @@ function JournalForm({ token, onEntryCreated }) {
     setLoading(true);
     setError("");
     setSuccess("");
-    // --- Simple validation ---
+
     if (text.trim().length < 10) {
       setError("Entry must be at least 10 characters.");
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/journal`, {
         method: "POST",
@@ -40,8 +49,7 @@ function JournalForm({ token, onEntryCreated }) {
         mood: data.mood,
         sentiment: data.sentiment,
         themes: data.themes,
-        calmingMessage:
-          data.calmingMessage || "Remember to take a moment for yourself.",
+        calmingMessage: data.calmingMessage || "Remember to take a moment for yourself.",
       });
       setRecommendations(data.recommendations || []);
       onEntryCreated();
@@ -53,73 +61,84 @@ function JournalForm({ token, onEntryCreated }) {
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <h3>Write a new journal entry:</h3>
-        <textarea
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          maxWidth: 600,
+          mx: "auto",
+          p: 3,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          boxShadow: 3,
+        }}
+      >
+        <Typography variant="h6" component="h3">
+          Write a new journal entry:
+        </Typography>
+
+        <TextField
+          multiline
+          minRows={5}
+          variant="outlined"
+          fullWidth
+          required
           value={text}
           onChange={(e) => setText(e.target.value)}
-          rows={5}
-          style={{ width: "100%" }}
-          required
         />
-        <br />
-        <button type="submit" disabled={loading}>
+
+        <Button type="submit" variant="contained" color="primary" disabled={loading}>
           {loading ? "Saving..." : "Save"}
-        </button>
-        {loading && <span style={{ marginLeft: 10 }}>⏳</span>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
-      </form>
+        </Button>
+
+        {error && <Alert severity="error">{error}</Alert>}
+        {success && <Alert severity="success">{success}</Alert>}
+      </Box>
+
       {analysis && (
-        <div
-          style={{
-            marginTop: 20,
-            padding: 16,
-            backgroundColor: "#e6f0f8",
-            borderRadius: 8,
-          }}
+        <Paper
+          elevation={2}
+          sx={{ maxWidth: 600, mx: "auto", mt: 3, p: 3, bgcolor: "#e6f0f8", borderRadius: 2 }}
         >
-          {/* <h4>How your entry made us feel</h4> */}
-          <p style={{ marginTop: 10, fontStyle: "italic" }}>
+          <Typography variant="body1" fontStyle="italic" mb={1}>
             {analysis.calmingMessage}
-          </p>
-          <p>
+          </Typography>
+          <Typography>
             <strong>Mood:</strong> {analysis.mood}
-          </p>
-          <p>
+          </Typography>
+          <Typography>
             <strong>Sentiment:</strong> {analysis.sentiment}
-          </p>
-          <p>
+          </Typography>
+          <Typography>
             <strong>Themes:</strong> {analysis.themes.join(", ")}
-          </p>
-        </div>
+          </Typography>
+        </Paper>
       )}
+
       {recommendations.length > 0 && (
-        <div
-          style={{
-            marginTop: 20,
-            padding: 16,
-            backgroundColor: "#f0f4f8",
-            borderRadius: 8,
-          }}
+        <Paper
+          elevation={2}
+          sx={{ maxWidth: 600, mx: "auto", mt: 3, p: 3, bgcolor: "#f0f4f8", borderRadius: 2 }}
         >
-          <h4>Recommended Resources</h4>
-          <ul>
+          <Typography variant="h6" mb={2}>
+            Recommended Resources
+          </Typography>
+          <List>
             {recommendations.map((rec, idx) => (
-              <li key={idx} style={{ marginBottom: 8 }}>
-                <a
-                  href={rec.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontWeight: "bold", color: "#0056b3" }}
-                >
+              <ListItem key={idx} sx={{ flexDirection: "column", alignItems: "flex-start", mb: 1 }}>
+                <MuiLink href={rec.url} target="_blank" rel="noopener noreferrer" fontWeight="bold">
                   {rec.title}
-                </a>
-                <p style={{ margin: 0 }}>{rec.description}</p>
-              </li>
+                </MuiLink>
+                <Typography variant="body2" color="text.secondary">
+                  {rec.description}
+                </Typography>
+              </ListItem>
             ))}
-          </ul>
-        </div>
+          </List>
+        </Paper>
       )}
     </>
   );

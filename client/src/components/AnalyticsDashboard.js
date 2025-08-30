@@ -12,7 +12,8 @@ import {
   Legend,
 } from "chart.js";
 
-// Register the components you need
+import { Box, Typography, CircularProgress, Paper } from "@mui/material";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -46,13 +47,11 @@ function AnalyticsDashboard({ token }) {
     fetchAnalytics();
   }, [token]);
 
-  // Prepare data for charts
   const labels = entries.map((e) => new Date(e.entryDate).toLocaleDateString());
   const moods = entries.map((e) => e.mood);
   const sentimentMap = { positive: 1, neutral: 0, negative: -1, mixed: 0.5 };
   const sentimentScores = entries.map((e) => sentimentMap[e.sentiment] ?? 0);
 
-  // Count moods frequency for bar chart
   const moodCounts = {};
   moods.forEach((mood) => {
     moodCounts[mood] = (moodCounts[mood] || 0) + 1;
@@ -61,21 +60,27 @@ function AnalyticsDashboard({ token }) {
   const moodData = Object.values(moodCounts);
 
   return (
-    <div style={{ margin: "32px 0" }}>
-      <h2>Analytics Dashboard</h2>
+    <Box sx={{ my: 4, maxWidth: 700, mx: "auto" }}>
+      <Typography variant="h4" gutterBottom>
+        Analytics Dashboard
+      </Typography>
+
       {loading ? (
-        <p>Loading analytics...</p>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+          <CircularProgress />
+        </Box>
       ) : (
         <>
-          <div style={{ maxWidth: 600 }}>
-            <h4>Sentiment Over Time</h4>
+          <Paper sx={{ p: 3, mb: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              Sentiment Over Time
+            </Typography>
             <Line
               data={{
                 labels,
                 datasets: [
                   {
-                    label:
-                      "Sentiment Score (1=positive, 0=neutral, -1=negative)",
+                    label: "Sentiment Score (1=positive, 0=neutral, -1=negative)",
                     data: sentimentScores,
                     borderColor: "blue",
                     fill: false,
@@ -88,9 +93,12 @@ function AnalyticsDashboard({ token }) {
                 },
               }}
             />
-          </div>
-          <div style={{ maxWidth: 600, marginTop: 30 }}>
-            <h4>Mood Frequency</h4>
+          </Paper>
+
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Mood Frequency
+            </Typography>
             <Bar
               data={{
                 labels: moodLabels,
@@ -103,10 +111,10 @@ function AnalyticsDashboard({ token }) {
                 ],
               }}
             />
-          </div>
+          </Paper>
         </>
       )}
-    </div>
+    </Box>
   );
 }
 

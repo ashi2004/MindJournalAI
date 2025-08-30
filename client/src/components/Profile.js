@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ChangePassword from "./ChangePassword";
+import { Box, TextField, Button, Typography, Alert, CircularProgress } from "@mui/material";
 
 function Profile({ token }) {
   const [username, setUsername] = useState("");
@@ -52,40 +53,62 @@ function Profile({ token }) {
     }
   }
 
-  if (loading) return <p>Loading profile...</p>;
+  if (loading) return <Box sx={{ textAlign: "center", mt: 5 }}><CircularProgress /></Box>;
 
   return (
-    <div>
+    <Box sx={{ maxWidth: 500, mx: "auto", p: 4, bgcolor: "background.paper", borderRadius: 2, boxShadow: 3 }}>
       <form onSubmit={handleSubmit}>
-        <h2>Your Profile</h2>
-        <div>
-          <label>Username:</label>
-          <br />
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <br />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" disabled={saving}>
+        <Typography variant="h5" component="h2" mb={3} textAlign="center">
+          Your Profile
+        </Typography>
+
+        <TextField
+          label="Username"
+          type="text"
+          fullWidth
+          required
+          margin="normal"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        <TextField
+          label="Email"
+          type="email"
+          fullWidth
+          required
+          margin="normal"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={saving}
+          sx={{ mt: 2 }}
+        >
           {saving ? "Saving..." : "Save Changes"}
-        </button>
-        {message && <p style={{ color: "green" }}>{message}</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        </Button>
+
+        {message && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            {message}
+          </Alert>
+        )}
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
       </form>
+
+      {/* Pass token prop to ChangePassword */}
       <ChangePassword token={token} />
-    </div>
+    </Box>
   );
 }
 

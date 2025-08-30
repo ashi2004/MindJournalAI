@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 
 function ChangePassword({ token }) {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -46,41 +47,64 @@ function ChangePassword({ token }) {
   }
 
   return (
-    <form onSubmit={handleChange} style={{ marginTop: 24 }}>
-      <h4>Change Password</h4>
-      <input
+    <Box
+      component="form"
+      onSubmit={handleChange}
+      sx={{
+        marginTop: 4,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        maxWidth: 400,
+        mx: "auto",
+      }}
+    >
+      <Typography variant="h6" component="h4" textAlign="center" gutterBottom>
+        Change Password
+      </Typography>
+
+      <TextField
+        label="Current Password"
         type="password"
-        placeholder="Current password"
+        required
         value={currentPassword}
         onChange={(e) => setCurrentPassword(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <input
+
+      <TextField
+        label="New Password"
         type="password"
-        placeholder="New password"
+        required
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <input
+
+      <TextField
+        label="Confirm New Password"
         type="password"
-        placeholder="Confirm new password"
+        required
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <button type="submit" disabled={loading}>
+
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={loading}
+      >
         {loading ? "Changing..." : "Change Password"}
-      </button>
+      </Button>
+
       {msg && (
-        <div style={{ color: msg.includes("success") ? "green" : "red" }}>
+        <Alert severity={msg.includes("success") ? "success" : "error"} sx={{ mt: 2 }}>
           {msg}
-        </div>
+        </Alert>
       )}
-    </form>
+    </Box>
   );
 }
 

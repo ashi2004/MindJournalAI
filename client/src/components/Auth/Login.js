@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { saveToken } from "../../auth";
+import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 
 function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -35,29 +36,61 @@ function Login({ onLoginSuccess }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      <input
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        maxWidth: 400,
+        mx: "auto",
+        mt: 8,
+        p: 4,
+        boxShadow: 3,
+        borderRadius: 2,
+        bgcolor: "background.paper",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <Typography variant="h5" component="h2" textAlign="center" mb={2}>
+        Login
+      </Typography>
+
+      <TextField
+        label="Email"
         type="email"
-        placeholder="Email"
+        required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <input
+
+      <TextField
+        label="Password"
         type="password"
-        placeholder="Password"
+        required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        required
+        fullWidth
       />
-      <br />
-      <button type="submit" disabled={loading}>
+
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={loading}
+        fullWidth
+        sx={{ mt: 1 }}
+      >
         {loading ? "Logging in..." : "Login"}
-      </button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </form>
+      </Button>
+
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+    </Box>
   );
 }
 

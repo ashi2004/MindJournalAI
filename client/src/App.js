@@ -7,6 +7,13 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+
+
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import JournalFeed from "./components/JournalFeed";
@@ -22,7 +29,7 @@ import EntryDetails from "./components/EntryDetails";
 function HomePage() {
   return (
     <div>
-      <h1>Welcome to MindJournalAI!</h1>
+      <h2>Welcome to MindJournalAI!</h2>
       <p>Track your mood, write journals, and see analytics. Use the navigation to explore features.</p>
     </div>
   );
@@ -36,7 +43,7 @@ function WelcomeGuest() {
     </div>
   );
 }
-
+ 
 function AppContent({ token, setToken }) {
   const [refreshFeed, setRefreshFeed] = useState(0);
   const navigate = useNavigate();
@@ -56,68 +63,44 @@ function AppContent({ token, setToken }) {
 
   return (
     <>
-      <nav style={{
-        display: "flex",
-        alignItems: "center",
-        background: "#a66ca4ff",
-        padding: "16px 24px",
-        color: "white",
-        gap: "20px"
-      }}>
-        <span style={{ fontWeight: "bold", fontSize: "22px" }}>MindJournalAI</span>
-        {!token ? (
-          <>
-            <Link to="/login"><button>Login</button></Link>
-            <Link to="/register"><button>Sign Up</button></Link>
-          </>
-        ) : (
-          <>
-            <Link to="/"><button>Home</button></Link>
-            <Link to="/dashboard"><button>Dashboard</button></Link>
-            <Link to="/journal"><button>New Entry</button></Link>
-            <Link to="/history"><button>History</button></Link>
-            <Link to="/profile"><button>Profile</button></Link>
-            <button onClick={handleLogout}>Logout</button>
-          </>
-        )}
-      </nav>
+      {/* Material UI AppBar */}
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <Typography variant="h4" component="div" sx={{ flexGrow: 1, fontWeight: "bold" }}>
+            MindJournal AI
+          </Typography>
+          {!token ? (
+            <>
+              <Button color="inherit" component={Link} to="/login">Login</Button>
+              <Button color="inherit" component={Link} to="/register">Sign Up</Button>
+            </>
+          ) : (
+            <>
+              <Button color="inherit" component={Link} to="/">Home</Button>
+              <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
+              <Button color="inherit" component={Link} to="/journal">New Entry</Button>
+              <Button color="inherit" component={Link} to="/history">History</Button>
+              <Button color="inherit" component={Link} to="/profile">Profile</Button>
+              <Button color="inherit" onClick={handleLogout}>Logout</Button>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
 
-      <div style={{ maxWidth: 900, margin: "auto", minHeight: "70vh", padding: "24px" }}>
+      {/* Content container */}
+      <Box sx={{ maxWidth: 900, mx: "auto", minHeight: "70vh", p: 3 }}>
         <Routes>
-          {/* Home/Landing */}
           <Route path="/" element={token ? <HomePage /> : <WelcomeGuest />} />
-          {/* Authentication */}
-          <Route path="/login" element={
-            token ? <Navigate to="/" /> : <Login onLoginSuccess={handleAuthSuccess} />
-          } />
-          <Route path="/register" element={
-            token ? <Navigate to="/" /> : <Register onRegisterSuccess={handleAuthSuccess} />
-          } />
-          {/* Dashboard (Analytics) */}
-          <Route path="/dashboard" element={
-            token ? <Dashboard token={token} /> : <Navigate to="/login" />
-          } />
-          {/* Journal New Entry */}
-          <Route path="/journal" element={
-            token ? <JournalForm token={token} onEntryCreated={() => setRefreshFeed(r => r + 1)} /> : <Navigate to="/login" />
-          } />
-          {/* History/Feed (All Entries + Pagination) */}
-          <Route path="/history" element={
-            token ? <JournalFeed token={token} refreshFeed={refreshFeed} /> : <Navigate to="/login" />
-          } />
-          {/* Profile */}
-          <Route path="/profile" element={
-            token ? <Profile token={token} /> : <Navigate to="/login" />
-          } />
-          {/* EntryDetails */}
-          <Route path="/entry/:id" element={
-  token ? <EntryDetails token={token} /> : <Navigate to="/login" />
-} />
-
-          {/* Fallback */}
+          <Route path="/login" element={token ? <Navigate to="/" /> : <Login onLoginSuccess={handleAuthSuccess} />} />
+          <Route path="/register" element={token ? <Navigate to="/" /> : <Register onRegisterSuccess={handleAuthSuccess} />} />
+          <Route path="/dashboard" element={token ? <Dashboard token={token} /> : <Navigate to="/login" />} />
+          <Route path="/journal" element={token ? <JournalForm token={token} onEntryCreated={() => setRefreshFeed(r => r + 1)} /> : <Navigate to="/login" />} />
+          <Route path="/history" element={token ? <JournalFeed token={token} refreshFeed={refreshFeed} /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={token ? <Profile token={token} /> : <Navigate to="/login" />} />
+          <Route path="/entry/:id" element={token ? <EntryDetails token={token} /> : <Navigate to="/login" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-      </div>
+      </Box>
     </>
   );
 }
@@ -135,6 +118,7 @@ function App() {
   if (loadingAuthState) return <p>Loading...</p>;
 
   return (
+    
     <Router>
       <AppContent token={token} setToken={setToken} />
     </Router>

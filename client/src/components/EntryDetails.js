@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 
 function EntryDetails({ token }) {
   const { id } = useParams();
@@ -27,33 +35,70 @@ function EntryDetails({ token }) {
     fetchEntry();
   }, [id, token]);
 
-  if (loading) return <p>Loading entry...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (!entry) return <p>Entry not found.</p>;
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+        <CircularProgress />
+      </Box>
+    );
+  if (error)
+    return (
+      <Alert severity="error" sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
+        {error}
+      </Alert>
+    );
+  if (!entry)
+    return (
+      <Typography
+        variant="body1"
+        sx={{ maxWidth: 600, mx: "auto", mt: 4, textAlign: "center" }}
+      >
+        Entry not found.
+      </Typography>
+    );
 
   return (
-    <div style={{ padding: 24, border: "1px solid #ccc", borderRadius: 8 }}>
-      <h2>Entry Details</h2>
-      <div>
+    <Paper
+      elevation={3}
+      sx={{
+        maxWidth: 700,
+        mx: "auto",
+        mt: 4,
+        p: 4,
+        borderRadius: 2,
+        bgcolor: "background.paper",
+      }}
+    >
+      <Typography variant="h4" gutterBottom>
+        Entry Details
+      </Typography>
+
+      <Typography variant="subtitle1" gutterBottom>
         <strong>Date:</strong> {new Date(entry.entryDate).toLocaleDateString()}
-      </div>
-      <div>
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
         <strong>Mood:</strong> {entry.mood}
-      </div>
-      <div>
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
         <strong>Sentiment:</strong> {entry.sentiment}
-      </div>
-      <div>
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
         <strong>Themes:</strong> {entry.themes.join(", ")}
-      </div>
-      <div style={{ marginTop: 16 }}>
-        <strong>Text:</strong>
-      </div>
-      <div>{entry.text}</div>
-      <button style={{ marginTop: 24 }} onClick={() => navigate(-1)}>
+      </Typography>
+
+      <Box mt={3} mb={2}>
+        <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+          <strong>Text:</strong> {entry.text}
+        </Typography>
+      </Box>
+
+      <Button variant="contained" onClick={() => navigate(-1)}>
         Back
-      </button>
-    </div>
+      </Button>
+    </Paper>
   );
 }
 

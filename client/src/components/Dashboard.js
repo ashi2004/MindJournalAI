@@ -1,15 +1,21 @@
 import React from "react";
+import { Box, Typography, Divider } from "@mui/material";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import MoodCalendar from "./MoodCalendar";
 
 function Dashboard({ token }) {
   return (
-    <div>
-      <h1>Your Dashboard</h1>
+    <Box sx={{ maxWidth: 900, mx: "auto", p: 3 }}>
+      <Typography variant="h3" gutterBottom>
+        Your Dashboard
+      </Typography>
+
       <AnalyticsDashboard token={token} />
-      <hr style={{ margin: "30px 0" }} />
+
+      <Divider sx={{ my: 4 }} />
+
       <MoodCalendar token={token} />
-    </div>
+    </Box>
   );
 }
 
