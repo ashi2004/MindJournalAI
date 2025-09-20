@@ -44,7 +44,7 @@ class Solution {
         // is a full binary tree, and we can
         // calculate the total nodes
         if (lh == rh) {
-            return (1 << lh) - 1;
+            return (int)Math.pow(2,lh) - 1;
         }
 
         // If the heights are not equal,
