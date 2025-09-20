@@ -8,7 +8,18 @@
  * }
  */
 class Solution {
-    // Step 1: Build parent map
+
+    // Custom Pair class
+    static class Pair {
+        TreeNode node;
+        int dist;
+        Pair(TreeNode node, int dist) {
+            this.node = node;
+            this.dist = dist;
+        }
+    }
+
+    // Step 1: Build parent map using BFS
     private void buildParent(TreeNode root, Map<TreeNode, TreeNode> parent) {
         Queue<TreeNode> q = new LinkedList<>();
         q.add(root);
@@ -27,43 +38,42 @@ class Solution {
 
     public List<Integer> distanceK(TreeNode root, TreeNode target, int k) {
         Map<TreeNode, TreeNode> parent = new HashMap<>();
-        buildParent(root, parent);  // preprocess parents
+        buildParent(root, parent);
 
         List<Integer> result = new ArrayList<>();
         Set<TreeNode> visited = new HashSet<>();
-        Queue<TreeNode> q = new LinkedList<>();
-        
-        q.add(target);
-        visited.add(target);
-        int dist = 0;
 
-        // Step 2: BFS
+        // Queue will store Pair(node, distance)
+        Queue<Pair> q = new LinkedList<>();
+        q.add(new Pair(target, 0));
+        visited.add(target);
+
         while (!q.isEmpty()) {
-            int size = q.size();
+            Pair p = q.poll();
+            TreeNode node = p.node;
+            int dist = p.dist;
+
             if (dist == k) {
-                for (TreeNode node : q) {
-                    result.add(node.val);
-                }
-                return result; // ✅ stop early
+                result.add(node.val);
+                // don’t expand further if we already reached distance k
+                continue;
             }
-            for (int i = 0; i < size; i++) {
-                TreeNode node = q.poll();
-                // Explore neighbors
-                if (node.left != null && !visited.contains(node.left)) {
-                    q.add(node.left);
-                    visited.add(node.left);
-                }
-                if (node.right != null && !visited.contains(node.right)) {
-                    q.add(node.right);
-                    visited.add(node.right);
-                }
-                if (parent.containsKey(node) && !visited.contains(parent.get(node))) {
-                    q.add(parent.get(node));
-                    visited.add(parent.get(node));
-                }
+
+            // Explore neighbors
+            if (node.left != null && !visited.contains(node.left)) {
+                q.add(new Pair(node.left, dist + 1));
+                visited.add(node.left);
             }
-            dist++;
+            if (node.right != null && !visited.contains(node.right)) {
+                q.add(new Pair(node.right, dist + 1));
+                visited.add(node.right);
+            }
+            if (parent.containsKey(node) && !visited.contains(parent.get(node))) {
+                q.add(new Pair(parent.get(node), dist + 1));
+                visited.add(parent.get(node));
+            }
         }
+
         return result;
     }
 }
