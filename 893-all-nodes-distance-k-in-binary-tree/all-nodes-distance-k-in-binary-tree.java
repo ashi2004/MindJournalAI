@@ -56,7 +56,7 @@ class Solution {
             if (dist == k) {
                 result.add(node.val);
                 // don’t expand further if we already reached distance k
-                continue;
+              
             }
 
             // Explore neighbors
