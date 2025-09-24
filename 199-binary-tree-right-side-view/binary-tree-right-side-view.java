@@ -25,12 +25,39 @@ class Solution {
              recursionRight(root.left,level+1,res);
     }
     public List<Integer> rightSideView(TreeNode root) {
-         List<Integer> res = new ArrayList<>();
+        //  List<Integer> res = new ArrayList<>();
 
-        // Call the recursive function
-        // to populate the right-side view
-        recursionRight(root, 0, res);
+        // // Call the recursive function
+        // // to populate the right-side view
+        // recursionRight(root, 0, res);
 
-        return res;
+        // return res;
+         List<Integer> result = new ArrayList<>();
+        if (root == null) return result;
+
+        Map<Integer, Integer> map = new HashMap<>();
+        Queue<TreeNode> q = new LinkedList<>();
+        q.add(root);
+        int level = 0;
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+
+            for (int i = 0; i < size; i++) {
+                TreeNode node = q.poll();
+
+                // overwrite so that last node at this level remains
+                map.put(level, node.val);
+
+                if (node.left != null) q.add(node.left);
+                if (node.right != null) q.add(node.right);
+            }
+            level++; // after finishing one level
+        }
+
+        for (int i = 0; i < map.size(); i++) {
+            result.add(map.get(i));
+        }
+        return result;
     }
 }
