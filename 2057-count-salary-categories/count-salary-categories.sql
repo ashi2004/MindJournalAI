@@ -4,14 +4,14 @@ SELECT
     ,COUNT(CASE WHEN income<20000 THEN 1 END) AS accounts_count
 FROM accounts
 
-UNION ALL
+UNION 
 
 SELECT
     'Average Salary' AS category
     ,COUNT(CASE WHEN income BETWEEN 20000 AND 50000 THEN 1 END) AS accounts_count
 FROM accounts
 
-UNION ALL
+UNION 
 
 SELECT 
     'High Salary' AS category
