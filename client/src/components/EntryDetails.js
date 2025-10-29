@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -12,6 +13,11 @@ import {
 function EntryDetails({ token }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Detect if redirected after deletion
+  const entryDeleted = location.state?.entryDeleted || false;
+
   const [entry, setEntry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -20,6 +26,7 @@ function EntryDetails({ token }) {
   useEffect(() => {
     async function fetchEntry() {
       setLoading(true);
+      setError(""); // Reset error on new fetch
       try {
         const res = await fetch(`${API_BASE}/api/journal/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -33,7 +40,33 @@ function EntryDetails({ token }) {
       setLoading(false);
     }
     fetchEntry();
-  }, [id, token]);
+  }, [id, token, API_BASE]);
+
+  useEffect(() => {
+    if (error && error.includes("Failed to load entry")) {
+      const timer = setTimeout(() => {
+        navigate("/history");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, navigate]);
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      try {
+        const res = await fetch(`${API_BASE}/api/journal/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Delete failed");
+        alert("Entry deleted successfully");
+        // Redirect to journal feed with deletion info in state
+        navigate("/history", { state: { entryDeleted: true } });
+      } catch (err) {
+        alert("Failed to delete entry: " + err.message);
+      }
+    }
+  };
 
   if (loading)
     return (
@@ -41,12 +74,14 @@ function EntryDetails({ token }) {
         <CircularProgress />
       </Box>
     );
+
   if (error)
     return (
-      <Alert severity="error" sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
-        {error}
+      <Alert severity="info" sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
+        {entryDeleted ? "Entry deleted." : error} Redirecting to your journal entries...
       </Alert>
     );
+
   if (!entry)
     return (
       <Typography
@@ -97,6 +132,15 @@ function EntryDetails({ token }) {
 
       <Button variant="contained" onClick={() => navigate(-1)}>
         Back
+      </Button>
+
+      <Button
+        variant="outlined"
+        color="error"
+        onClick={handleDelete}
+        sx={{ ml: 2 }}
+      >
+        Delete Entry
       </Button>
     </Paper>
   );

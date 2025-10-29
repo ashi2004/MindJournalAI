@@ -1,37 +1,33 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const JournalEntry = require("../models/JournalEntry");
-// import { GoogleGenAI } from "@google/genai";
 const axios = require("axios");
-
-// require('dotenv').config();
+require("dotenv").config();
 
 const router = express.Router();
 
-// const ai = new GoogleGenAI({});
-
 async function analyzeTextWithGemini(text) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const model = "gemini-1.5-flash"; // or gemini-2.5-pro for deeper analysis
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const model = "gemini-2.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
 
   const prompt = `
-// Analyze the following journal entry and return a valid JSON object only. 
-// Do not include markdown, explanations, or text outside of the JSON.
+
 Analyze the following journal entry deeply.
 1. Detect the overall sentiment (positive, negative, neutral, or mixed).
 2. Identify the main mood of the writer in a single word (e.g., happy, anxious, sad, excited).
 3. Extract key themes as a list (e.g., relationships, stress, work, family, health).
 4. Provide a calmingMessage or advice written in a warm, empathetic, and supportive tone, as if a caring friend is responding and acknowledging the feelings in detail.
 5. Suggest ONE single Unicode emoji character (not name, not multiple emojis) that best matches the overall emotional tone and themes of the entry.
-6. Recommend 2 to 3 relevant external resources based on the entry,
-// which may include articles, videos, or podcasts.
-// For each resource provide:
-// "title": short title,
-// "description": brief description,
-// "url": direct link to the resource.
-// Ensure at least one video link is included when suitable.
+6. Recommend 2 to 3 relevant external resources based on the entry.
+   - Each recommendation must include:
+     - title (short text, max 5 words)
+     - description (short text)
+     - url (only domain-level HTTPS URLs, no query parameters or special characters)
+   - Ensure the JSON is strictly valid with properly escaped strings.
+   - Do NOT add any extra commentary outside JSON.
+   - Return the data strictly in JSON format as shown below.
+
 Return the result strictly in JSON with keys: sentiment, mood, themes, calmingMessage, emoji, recommendations.
 
 Journal Entry: "${text}"
@@ -47,58 +43,57 @@ Format:
     {
       "title": "string",
       "description": "string",
-      "url": "string"
+      "url": "string (domain-level HTTPS URL only, e.g., https://youtube.com)"
     }
   ]
 }
 `;
 
   const requestBody = {
-    contents: [
-      {
-        parts: [{ text: prompt }],
-      },
-    ],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 1024,
-    },
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
   };
 
   try {
+    console.log("🟦 [Gemini] Sending request...");
     const response = await axios.post(url, requestBody, {
       headers: { "Content-Type": "application/json" },
     });
 
     const candidates = response.data.candidates;
-    if (!candidates || candidates.length === 0) {
-      throw new Error("No candidates returned from Gemini");
-    }
+    if (!candidates || candidates.length === 0) throw new Error("No candidates returned");
 
-    let textResponse =
-      candidates[0]?.content?.parts?.map((p) => p.text).join("") || "";
-    if (!textResponse) {
-      throw new Error("Empty response from Gemini");
-    }
-
-    // Remove ```json or ``` fences if Gemini includes them
+    let textResponse = candidates[0]?.content?.parts?.map((p) => p.text).join("") || "";
     textResponse = textResponse.replace(/```json|```/g, "").trim();
 
     let analysis;
     try {
-      console.log(
-        "Raw Gemini response:",
-        JSON.stringify(response.data, null, 2)
-      );
       analysis = JSON.parse(textResponse);
-    } catch (e) {
-      console.error("Failed to parse Gemini JSON:", textResponse);
-      throw e;
-    }
+    } catch (err) {
+      console.error("❌ [Gemini] Failed to parse JSON:", textResponse);
 
+       let cleanedResponse = textResponse
+    .replace(/\n/g, "") // remove newlines
+    .replace(/\\(?=["\\])/g, "\\\\") // escape unescaped quotes and backslashes
+
+  // Attempt partial parse at last complete brace
+  const lastBraceIndex = cleanedResponse.lastIndexOf("}");
+  if (lastBraceIndex !== -1) {
+    try {
+      const partial = cleanedResponse.substring(0, lastBraceIndex + 1);
+      analysis = JSON.parse(partial);
+      console.warn("⚠️ [Gemini] Partial JSON parsed from cleaned truncated response.");
+    } catch {
+      throw err;
+    }
+  } else {
+    throw err;
+  }
+    }
+   
     return analysis;
   } catch (err) {
-    console.error("Gemini API error:", err.response?.data || err.message);
+    console.error("🔴 [Gemini] API Error:", err.response?.data || err.message);
     return {
       sentiment: "neutral",
       mood: "neutral",
@@ -111,10 +106,28 @@ Format:
   }
 }
 
-// Your POST route
+// 🩵 Helper function to sanitize recommendations before saving
+function sanitizeRecommendations(raw) {
+  if (Array.isArray(raw)) {
+    return raw.filter((r) => r && typeof r === "object" && r.title);
+  } else if (typeof raw === "string" && raw.trim() !== "") {
+    return [
+      {
+        title: raw.trim(),
+        description: "Suggested reading or resource",
+        url: "https://www.google.com/search?q=" + encodeURIComponent(raw.trim()),
+      },
+    ];
+  } else {
+    return [];
+  }
+}
+
+// ✅ POST route (corrected)
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { entryDate, mood, text } = req.body;
+    const { entryDate, text } = req.body;
+    console.log("🟨 [POST /api/journal] New entry received:", text);
 
     const analysis = await analyzeTextWithGemini(text);
 
@@ -131,8 +144,10 @@ router.post("/", authMiddleware, async (req, res) => {
     });
 
     await journalEntry.save();
-  res.status(201).json({
-  ...journalEntry.toObject(),
+    console.log("🟢 [POST /api/journal] Journal entry saved successfully!");
+
+    res.status(201).json({
+      ...journalEntry.toObject(),
   calmingMessage: analysis.calmingMessage || "Take some time to breathe and relax.",
   emoji: analysis.emoji || "🙂",
   recommendations: analysis.recommendations || []

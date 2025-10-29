@@ -53,9 +53,9 @@ function JournalFeed({ token, refreshFeed }) {
     );
   }
 
-  function handleDelete(deletedId) {
-    setEntries((prevEntries) => prevEntries.filter((e) => e._id !== deletedId));
-  }
+  // function handleDelete(deletedId) {
+  //   setEntries((prevEntries) => prevEntries.filter((e) => e._id !== deletedId));
+  // }
 
   function handlePageChange(event, value) {
     setPage(value);
@@ -97,7 +97,7 @@ function JournalFeed({ token, refreshFeed }) {
               entry={entry}
               token={token}
               onUpdate={handleUpdate}
-              onDelete={handleDelete}
+              // onDelete={handleDelete}
             />
           </Link>
         ))}

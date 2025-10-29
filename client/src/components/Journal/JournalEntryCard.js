@@ -130,14 +130,14 @@ function JournalEntryCard({ entry, token, onUpdate, onDelete }) {
         >
           Edit
         </Button>
-        <Button
+        {/* <Button
           onClick={handleDelete}
           disabled={loading}
           size="small"
           sx={{ backgroundColor: "#f44336", color: "#fff", "&:hover": { backgroundColor: "#d32f2f" } }}
         >
           {loading ? "Deleting..." : "Delete"}
-        </Button>
+        </Button> */}
       </CardActions>
     </Card>
   );
